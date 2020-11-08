@@ -1,1 +1,1 @@
-<img src = "wave_logo.png" align = "center"></img>
+![Wave Logo](wave_logo.png)
