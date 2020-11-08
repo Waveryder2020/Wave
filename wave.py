@@ -3,13 +3,20 @@
 import sys
 import pathlib
 import json
-import wave_lib as wl
+
+sp = " " * 4
+html_body = ""
 
 p_title = "Wave Document"
 p_bgcolor = "white"
 p_bgimage = "none"
 p_align = "left"
-p_margin = 0
+p_box = 0
+p_box_style = "hidden"
+
+def key_exists(dict_key, dictionary):
+    keys = list(dictionary.keys())
+    return (dict_key in keys)
 
 if len(sys.argv) == 1:
     path = input("Specify the path to the script: ")
@@ -23,24 +30,40 @@ else:
     exit()
 
 script = json.load(script_file)
+script_file.close()
 
-if wl.key_exists("~page", script):
+if key_exists("~page", script):
     page_property = script["~page"]
 
-if wl.key_exists("~title", page_property):
-    p_title = page_property["~title"]
-if wl.key_exists("~bg", page_property):
-    p_bgcolor = page_property["~bg"]
-if wl.key_exists("~img", page_property):
-    p_bgimage = page_property["~img"]
-if wl.key_exists("~align", page_property):
-    p_align = page_property["~align"]
-if wl.key_exists("~margin", page_property):
-    p_margin = page_property["~margin"]
+    if key_exists("~title", page_property):
+        p_title = page_property["~title"]
+    if key_exists("~bg", page_property):
+        p_bgcolor = page_property["~bg"]
+    if key_exists("~img", page_property):
+        p_bgimage = page_property["~img"]
+    if key_exists("~align", page_property):
+        p_align = page_property["~align"]
+    if key_exists("~box", page_property):
+        p_box = page_property["~box"]
+    if key_exists("~box-style", page_property):
+        p_box_style = page_property["~box-style"]
 
-print(p_align); print(p_margin); print(p_bgcolor)
+if key_exists("$content", script):
+    content_property = script["$content"]
+
+    if key_exists("$heading", content_property):
+        heading = content_property["$heading"]
+        html_body += f"\t<br><h1 style = 'text-align: center; font-family: Arial Narrow, sans-serif'>{heading}</h1>\n"
+    if key_exists("$author", content_property):
+        author = content_property["$author"]
+        html_body += f"\t<br><h2 style = 'text-align: center; font-family: URW Chancery L, cursive'><i>{author}</i></h2>\n"
 
 html_top = f"""
+<!--
+This Document is generated using Wave.
+Wave: https://www.github.com/Waveryder2020/Wave
+-->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -50,16 +73,20 @@ html_top = f"""
                 background-color: {p_bgcolor};
                 background-image: url({p_bgimage});
                 text-align: {p_align};
-                margin-top: {p_margin}px;
-                margin-left: {p_margin}px;
-                margin-right: {p_margin}px;
-                margin-bottom: {p_margin}px;
+                margin-top: {p_box}px;
+                margin-left: {p_box}px;
+                margin-right: {p_box}px;
+                margin-bottom: {p_box}px;
+                border-style: {p_box_style};
             }}
         </style>
     </head>
 """
 
-document = html_top + "<body><p>Text</p></body></html>"
-file = open("doc.html", "w+", encoding = "utf-8")
-file.write(document)
-file.close()
+html_document = html_top + f"\n{sp}<body>\n\n" + html_body + f"\n{sp}</body>\n</html>\n"
+file_name = path.split(".")
+out_name = file_name[0] + ".html"
+print(html_document)
+out_file = open(out_name, "w+", encoding = "utf-8")
+out_file.write(html_document)
+out_file.close()
