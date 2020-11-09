@@ -48,6 +48,13 @@ if key_exists("~page", script):
     if key_exists("~box-style", page_property):
         p_box_style = page_property["~box-style"]
 
+c_p_bgcolor = p_bgcolor
+c_p_align = p_align
+c_p_color = "black"
+c_p_size = 17
+c_p_box = 0
+c_p_body = ""
+
 if key_exists("$content", script):
     content_property = script["$content"]
 
@@ -57,6 +64,22 @@ if key_exists("$content", script):
     if key_exists("$author", content_property):
         author = content_property["$author"]
         html_body += f"\t<br><h2 style = 'text-align: center; font-family: URW Chancery L, cursive'><i>{author}</i></h2>\n"
+    if key_exists("$text", content_property):
+        text_properties = content_property["$text"]
+        if key_exists("$body", text_properties):
+            c_p_body = text_properties["$body"]
+        if key_exists("$size", text_properties):
+            c_p_size = text_properties["$size"]
+        if key_exists("$color", text_properties):
+            c_p_color = text_properties["$color"]
+        if key_exists("$align", text_properties):
+            c_p_align = text_properties["$align"]
+        if key_exists("$bg", text_properties):
+            c_p_bgcolor = text_properties["$bg"]
+        if key_exists("$box", text_properties):
+            c_p_box = text_properties["$box"]
+
+        html_body += f"\t<p style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size: {c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>{c_p_body}</p>"
 
 html_top = f"""
 <!--
@@ -73,10 +96,7 @@ Wave: https://www.github.com/Waveryder2020/Wave
                 background-color: {p_bgcolor};
                 background-image: url({p_bgimage});
                 text-align: {p_align};
-                margin-top: {p_box}px;
-                margin-left: {p_box}px;
-                margin-right: {p_box}px;
-                margin-bottom: {p_box}px;
+                margin: {p_box}px;
                 border-style: {p_box_style};
             }}
         </style>
