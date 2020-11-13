@@ -60,6 +60,16 @@ c_p_body = ""
 c_p_points_type = "bullet"
 c_p_points = ["*", "**", "***"]
 
+def set_defaults():
+    global c_p_bgcolor, c_p_align, c_p_color, c_p_size, c_p_box, c_p_body, c_p_points_type, c_p_points
+    c_p_bgcolor = p_bgcolor
+    c_p_align = p_align
+    c_p_color = "black"
+    c_p_size = 17
+    c_p_box = 0
+    c_p_body = ""
+    c_p_points_type = "bullet"
+    c_p_points = ["*", "**", "***"]
 
 if key_exists("$content", script):
     content_property = script["$content"]
@@ -72,44 +82,50 @@ if key_exists("$content", script):
         html_body += f"\t<br><h2 style = 'text-align: center; font-family: URW Chancery L, cursive'><i>{author}</i></h2>\n"
 
     content_property_copy = content_property.copy()
-    del content_property_copy["$heading"]
-    del content_property_copy["$author"]
+    if key_exists("$heading", content_property_copy):
+        del content_property_copy["$heading"]
+    if key_exists("$heading", content_property_copy):
+        del content_property_copy["$author"]
     regular_keywords = list(content_property_copy.keys())
+    regular_values = list(content_property_copy.values())
 
     for keywords in range(0, len(regular_keywords)):
-        if starts_with(regular_keywords[keywords], "$text"):
-            text_properties = content_property[regular_keywords[keywords]]
-            if key_exists("$body", text_properties):
-                c_p_body = text_properties["$body"]
-            if key_exists("$size", text_properties):
-                c_p_size = text_properties["$size"]
-            if key_exists("$color", text_properties):
-                c_p_color = text_properties["$color"]
-            if key_exists("$align", text_properties):
-                c_p_align = text_properties["$align"]
-            if key_exists("$bg", text_properties):
-                c_p_bgcolor = text_properties["$bg"]
-            if key_exists("$box", text_properties):
-                c_p_box = text_properties["$box"]
+        if starts_with(regular_keywords[keywords], "!inherit"):
+            inherit = content_property[regular_keywords[keywords]]
 
-            html_body += f"\t<p style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size: {c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>{c_p_body}</p>\n"
+            if isinstance(inherit, str):
+                if inherit == "default":
+                    set_defaults()
+                else:
+                    pass
+            elif isinstance(inherit, dict):
+                if key_exists("!size", inherit):
+                    c_p_size = inherit["!size"]
+                if key_exists("!color", inherit):
+                    c_p_color = inherit["!color"]
+                if key_exists("!align", inherit):
+                    c_p_align = inherit["!align"]
+                if key_exists("!bg", inherit):
+                    c_p_bgcolor = inherit["!bg"]
+                if key_exists("!box", inherit):
+                    c_p_box = inherit["!box"]
+                if key_exists("!points-type", inherit):
+                    if inherit["!type"] == "bullet":
+                        pass
+                if key_exists("$points-list", inherit):
+                    c_p_points = inherit["$list"]
+                    points_body = ""
+                    for join_points in range(0, len(c_p_points)):
+                        points_body += f"<li>{c_p_points[join_points]}</li>\n"
+                    c_p_point_start = f"<ul style = 'text-align: {c_p_align}'>"
+                    c_p_point_end = "</ul>"
+
+        if starts_with(regular_keywords[keywords], "$text"):
+            html_body += f"\t<p style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size: {c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>{regular_values[keywords]}</p>\n"
 
         if starts_with(regular_keywords[keywords], "$points"):
-            points_properties = content_property[regular_keywords[keywords]]
-            if key_exists("$align", points_properties):
-                c_p_align = points_properties["$align"]
-            if key_exists("$type", points_properties):
-                if points_properties["$type"] == "bullet":
-                    pass
-            if key_exists("$list", points_properties):
-                c_p_points = points_properties["$list"]
-                points_body = ""
-                for join_points in range(0, len(c_p_points)):
-                    points_body += f"<li>{c_p_points[join_points]}</li>\n"
-            c_p_point_start = f"<ul style = 'text-align: {c_p_align}'>"
-            c_p_point_end = "</ul>"
             html_body += f"\t{c_p_point_start}{points_body}{c_p_point_end}\n"
-
+        print(regular_keywords[keywords])
 html_top = f"""
 <!--
 This Document is generated using Wave.
