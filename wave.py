@@ -58,10 +58,10 @@ c_p_size = 17
 c_p_box = 0
 c_p_body = ""
 c_p_points_type = "bullet"
-c_p_points = ["*", "**", "***"]
+c_p_point_start = "ul"
 
 def set_defaults():
-    global c_p_bgcolor, c_p_align, c_p_color, c_p_size, c_p_box, c_p_body, c_p_points_type, c_p_points
+    global p_bg_color, p_align, c_p_bgcolor, c_p_align, c_p_color, c_p_size, c_p_box, c_p_body, c_p_points_type, c_p_point_start
     c_p_bgcolor = p_bgcolor
     c_p_align = p_align
     c_p_color = "black"
@@ -69,17 +69,17 @@ def set_defaults():
     c_p_box = 0
     c_p_body = ""
     c_p_points_type = "bullet"
-    c_p_points = ["*", "**", "***"]
+    c_p_point_start = "ul"
 
 if key_exists("$content", script):
     content_property = script["$content"]
 
     if key_exists("$heading", content_property):
         heading = content_property["$heading"]
-        html_body += f"\t<br><h1 style = 'text-align: center; font-family: Arial Narrow, sans-serif'>{heading}</h1>\n"
+        html_body += f"\t<br>\n\t<h1 style = 'text-align: center; font-family: Arial Narrow, sans-serif'>{heading}</h1>\n"
     if key_exists("$author", content_property):
         author = content_property["$author"]
-        html_body += f"\t<br><h2 style = 'text-align: center; font-family: URW Chancery L, cursive'><i>{author}</i></h2>\n"
+        html_body += f"\t<br>\n\t<h2 style = 'text-align: center; font-family: URW Chancery L, cursive'><i>{author}</i></h2>\n"
 
     content_property_copy = content_property.copy()
     if key_exists("$heading", content_property_copy):
@@ -109,23 +109,23 @@ if key_exists("$content", script):
                     c_p_bgcolor = inherit["!bg"]
                 if key_exists("!box", inherit):
                     c_p_box = inherit["!box"]
-                if key_exists("!points-type", inherit):
-                    if inherit["!type"] == "bullet":
-                        pass
-                if key_exists("$points-list", inherit):
-                    c_p_points = inherit["$list"]
-                    points_body = ""
-                    for join_points in range(0, len(c_p_points)):
-                        points_body += f"<li>{c_p_points[join_points]}</li>\n"
-                    c_p_point_start = f"<ul style = 'text-align: {c_p_align}'>"
-                    c_p_point_end = "</ul>"
+                # if key_exists("!points-type", inherit):
+                #     if inherit["!type"] == "bullet":
+                #         pass
+
 
         if starts_with(regular_keywords[keywords], "$text"):
             html_body += f"\t<p style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size: {c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>{regular_values[keywords]}</p>\n"
 
         if starts_with(regular_keywords[keywords], "$points"):
-            html_body += f"\t{c_p_point_start}{points_body}{c_p_point_end}\n"
-        print(regular_keywords[keywords])
+            points = regular_values[keywords]
+            points_head = f"\t<{c_p_point_start} style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size: {c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>\n"
+            points_body = ""
+            for c_p_points_join in range(0, len(points)):
+                points_body += f"\t\t<li>{points[c_p_points_join]}</li>\n"
+            points_complete = points_head + points_body + f"\t</{c_p_point_start}>\n"
+            html_body += points_complete
+
 html_top = f"""
 <!--
 This Document is generated using Wave.
@@ -150,8 +150,10 @@ Wave: https://www.github.com/Waveryder2020/Wave
 
 html_document = html_top + f"\n{sp}<body>\n\n" + html_body + f"\n{sp}</body>\n</html>\n"
 file_name = path.split(".")
-out_name = file_name[0] + ".html"
+file_name[-1] = ".html"
+out_name = "".join(file_name)
 print(html_document)
 out_file = open(out_name, "w+", encoding = "utf-8")
 out_file.write(html_document)
 out_file.close()
+print(f"Transpiled successfully to file: {out_name}")
