@@ -7,7 +7,7 @@ import json
 sp = " " * 4
 html_body = ""
 
-# Default Properties for the ~page container.
+# Default properties for the ~page container.
 p_title = "Wave Document"
 p_bgcolor = "white"
 p_bgimage = "none"
@@ -64,6 +64,7 @@ if key_exists("~page", script):
     if key_exists("~box-style", page_property):
         p_box_style = page_property["~box-style"]
 
+# Default properties for the $content container.
 c_p_bgcolor = p_bgcolor
 c_p_align = p_align
 c_p_color = "black"
@@ -178,10 +179,10 @@ html_document = html_top + f"\n{sp}<body>\n\n" + html_body + f"\n{sp}</body>\n</
 
 # Removes the script extension (if it exists) and adds .html extenstion.
 file_name = path.split(".")
-if starts_with(file_name[-1], "."):
-    file_name[-1] = ".html"
-else:
+if len(file_name) == 1:
     file_name.append(".html")
+else:
+    file_name[-1] = ".html"
 
 # Writes the HTML Document in a HTML file.
 out_name = "".join(file_name)
