@@ -7,7 +7,6 @@ import json
 sp = " " * 4
 html_body = ""
 
-# Default properties for the ~page container.
 p_title = "Wave Document"
 p_bgcolor = "white"
 p_bgimage = "none"
@@ -16,35 +15,23 @@ p_box = 0
 p_box_style = "hidden"
 
 def key_exists(dict_key, dictionary):
-    """
-        Checks if a key exists in a dictionary.
-    """
     keys = list(dictionary.keys())
     return (dict_key in keys)
 
 def starts_with(long_str, sub_str):
-    """
-        Checks if a string starts with another string.
-    """
     return (sub_str == long_str[0:len(sub_str)])
 
-"""
-    Checks if the script file is passed as a command-line argument.
-    If not, then asks the user to specify it.
-"""
 if len(sys.argv) == 1:
     path = input("Specify the path to the script: ")
 else:
     path = sys.argv[1]
 
-# Checks if the specified script path exists or not.
 if pathlib.Path(path).exists():
     script_file = open(path, "r", encoding = "utf-8")
 else:
     print(f"Invalid Path: {path}")
     exit()
 
-# Converts JSON from script to a Python Dictionary.
 script = json.load(script_file)
 script_file.close()
 
@@ -64,20 +51,16 @@ if key_exists("~page", script):
     if key_exists("~box-style", page_property):
         p_box_style = page_property["~box-style"]
 
-# Default properties for the $content container.
 c_p_bgcolor = p_bgcolor
 c_p_align = p_align
 c_p_color = "black"
 c_p_size = 17
 c_p_box = 0
 c_p_body = ""
-c_p_points_type = "bullet"
+c_p_points_type = "disc"
 c_p_point_start = "ul"
 
 def set_defaults():
-    """
-        Sets all the $content properties to their default values.
-    """
     global p_bg_color, p_align, c_p_bgcolor, c_p_align, c_p_color, \
         c_p_size, c_p_box, c_p_body, c_p_points_type, c_p_point_start
     c_p_bgcolor = p_bgcolor
@@ -86,7 +69,7 @@ def set_defaults():
     c_p_size = 17
     c_p_box = 0
     c_p_body = ""
-    c_p_points_type = "bullet"
+    c_p_points_type = "disc"
     c_p_point_start = "ul"
 
 if key_exists("$content", script):
@@ -129,11 +112,13 @@ if key_exists("$content", script):
                     c_p_bgcolor = inherit["!bg"]
                 if key_exists("!box", inherit):
                     c_p_box = inherit["!box"]
-                # if key_exists("!points-type", inherit):
-                #     if inherit["!type"] == "bullet":
-                #         pass
-
-
+                if key_exists("!points-type", inherit):
+                    if inherit["!points-type"] in ["circle", "square", "disc"]:
+                        c_p_point_start = "ul"
+                        c_p_points_type = inherit["!points-type"]
+                    if inherit["!points-type"] in ["lower-roman", "upper-roman", "decimal", "lower-alpha", "upper-alpha"]:
+                        c_p_point_start = "ol"
+                        c_p_points_type = inherit["!points-type"]
         if starts_with(regular_keywords[keywords], "$text"):
             html_body += (f"\t<p style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size:" + \
                 f"{c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>{regular_values[keywords]}</p>\n")
@@ -141,7 +126,7 @@ if key_exists("$content", script):
         if starts_with(regular_keywords[keywords], "$points"):
             points = regular_values[keywords]
             points_head = (f"\t<{c_p_point_start} style = 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size:" + \
-                f"{c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;'>\n")
+                f"{c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px; list-style-type: {c_p_points_type};'>\n")
             points_body = ""
             for c_p_points_join in range(0, len(points)):
                 points_body += f"\t\t<li>{points[c_p_points_join]}</li>\n"
@@ -174,17 +159,14 @@ Wave: https://www.github.com/Waveryder2020/Wave
     </head>
 """
 
-# Assembles the complete HTML Document.
 html_document = html_top + f"\n{sp}<body>\n\n" + html_body + f"\n{sp}</body>\n</html>\n"
 
-# Removes the script extension (if it exists) and adds .html extenstion.
 file_name = path.split(".")
 if len(file_name) == 1:
     file_name.append(".html")
 else:
     file_name[-1] = ".html"
 
-# Writes the HTML Document in a HTML file.
 out_name = "".join(file_name)
 print(html_document)
 out_file = open(out_name, "w+", encoding = "utf-8")
