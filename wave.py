@@ -133,6 +133,10 @@ if key_exists("$content", script):
             points_complete = points_head + points_body + f"\t</{c_p_point_start}>\n"
             html_body += points_complete
 
+        if starts_with(regular_keywords[keywords], "$nl"):
+            times = int(regular_values[keywords])
+            html_body += ("\n" + ("<br>" * times) + "\n")
+
         if starts_with(regular_keywords[keywords], "$pic"):
             html_body += f"\t<img 'color: {c_p_color}; background-color: {c_p_bgcolor}; font-size:" + \
                 f"{c_p_size}px; text-align: {c_p_align}; margin: {c_p_box}px;' src = '{regular_values[keywords]}'>"
@@ -168,7 +172,6 @@ else:
     file_name[-1] = ".html"
 
 out_name = "".join(file_name)
-print(html_document)
 out_file = open(out_name, "w+", encoding = "utf-8")
 out_file.write(html_document)
 out_file.close()
